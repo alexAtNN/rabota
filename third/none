@@ -1,0 +1,57 @@
+<?php
+require_once 'figures/class/rectangle.php';
+require_once 'figures/class/circle.php';
+require_once 'figures/class/triangle.php';
+
+use Figures\Rectangle;
+use Figures\Circle;
+use Figures\Triangle;
+
+
+$Circlearr=array('type' => 'circle','radius' =>rand(1,10));
+$Rectanglearr=array('type' => 'rectangle','a' =>rand(1,10),'b'=>rand(1,10));
+
+$json2 = json_encode($Circlearr);
+$json1 = json_encode($Rectanglearr);
+$file = fopen('new.json', 'w');
+$write = fwrite($file,'[');
+$write = fwrite($file,$json2);
+$write = fwrite($file,',');
+$write = fwrite($file,$json1);
+$write = fwrite($file,']');
+if($write) echo "Данные успешно записаны в файл new.json !<br>";
+else echo "Не удалось записать данные!<br>";
+//закрываем файл
+fclose($file);
+$path = file_get_contents("new.json");
+$json = json_decode($path, true);
+
+for($i=0;$i<count($json);$i++) {
+	switch ($json[$i]['type']) {
+	    case "circle":
+	        $figure = new Circle($json[$i]['radius']);
+	        break;
+	    case "rectangle":
+		    $figure = new Rectangle($json[$i]['a'], $json[$i]['b']);
+	        break;
+	}
+	$json[$i]['s'] = $figure->Area();
+}
+
+usort($json, function($a, $b) {
+    if($a['s'] === $b['s'])
+        return 0;        
+    return $a['s'] > $b['s'] ? -1 : 1;
+});
+
+for($i=0;$i<count($json);$i++) {
+	switch ($json[$i]['type']) {
+	    case "circle":
+	        echo "Круг. Рудиус=".$json[$i]['radius'].". Площадь:\n".$json[$i]['s']."</br>";
+	        break;
+	    case "rectangle":
+		    echo "Прямоугольник. a=".$json[$i]['a'].", b=".$json[$i]['b'].". Площадь:\n".$json[$i]['s']."</br>";
+	        break;
+	}
+}
+?>
